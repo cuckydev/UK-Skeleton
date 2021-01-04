@@ -1,0 +1,11 @@
+# Exclude recommended CMake build directory
+build/
+
+# Exclude potential binaries
+bin/UKSkeleton
+bin/UKSkeleton_debug
+bin/UKSkeleton.exe
+bin/UKSkeleton_debug.exe
+
+# Exclude VS Code data
+.vscode/
