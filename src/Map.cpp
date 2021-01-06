@@ -1,13 +1,25 @@
+/*
+ * UK Skeleton
+ * File: Map.cpp
+ * 
+ * Purpose: Define map class
+ * 
+ * Authour(s): Regan "CuckyDev" Green
+*/
+
 #include "Map.h"
 #include "Render.h"
 #include "GameDef.h"
 #include "Main.h"
 
+#include <fstream>
 #include <cmath>
+
 constexpr double pi = 3.14159265358979323846;
 
 namespace Map
 {
+	/*
 	//vertices
 	static const Vertex vert[] = {
 		{ 200.0f, -100.0f},
@@ -39,20 +51,20 @@ namespace Map
 	};
 	
 	static const ReadSector sector_0 = {
-		-41.0f,
+		140.0f,
 		200.0f,
 		0x201000FF,
 		0x581B90FF,
+		4,
 		wall_0,
 		vertex_0,
-		4,
 	};
 	
 	//sector 1
 	static const ReadWall wall_1[] = {
 		{      0, 0x581B90FF, 0x808080FF, 0x180800FF},
 		{nullind, 0x581B90FF, 0x909090FF, 0x180800FF},
-		{      3, 0x581B90FF, 0xA0A0A0FF, 0x180800FF},
+		{nullind, 0x581B90FF, 0xA0A0A0FF, 0x180800FF},
 		{nullind, 0x581B90FF, 0xB0B0B0FF, 0x180800FF},
 		{      2, 0x581B90FF, 0xC0C0C0FF, 0x180800FF},
 		{nullind, 0x581B90FF, 0xD0D0D0FF, 0x180800FF},
@@ -63,13 +75,13 @@ namespace Map
 	};
 	
 	static const ReadSector sector_1 = {
-		-30.0f,
+		120.0f,
 		200.0f,
 		0x201000FF,
 		0x581B90FF,
+		6,
 		wall_1,
 		vertex_1,
-		6,
 	};
 	
 	//sector 2
@@ -85,18 +97,18 @@ namespace Map
 	};
 	
 	static const ReadSector sector_2 = {
-		-20.0f,
+		100.0f,
 		200.0f,
 		0x201000FF,
 		0x581B90FF,
+		4,
 		wall_2,
 		vertex_2,
-		4,
 	};
 	
 	//sector 3
 	static const ReadWall wall_3[] = {
-		{      1, 0x581B90FF, 0x808080FF, 0x180800FF},
+		{      5, 0x808080FF, 0x808080FF, 0x180800FF},
 		{nullind, 0x581B90FF, 0x909090FF, 0x180800FF},
 		{      4, 0x581B90FF, 0xA0A0A0FF, 0x180800FF},
 		{nullind, 0x581B90FF, 0xB0B0B0FF, 0x180800FF},
@@ -107,13 +119,13 @@ namespace Map
 	};
 	
 	static const ReadSector sector_3 = {
-		-20.0f,
+		40.0f,
 		200.0f,
 		0x201000FF,
 		0x581B90FF,
+		4,
 		wall_3,
 		vertex_3,
-		4,
 	};
 	
 	//sector 4
@@ -131,30 +143,55 @@ namespace Map
 	};
 	
 	static const ReadSector sector_4 = {
-		-8.0f,
+		80.0f,
 		200.0f,
 		0x201000FF,
 		0x581B90FF,
+		6,
 		wall_4,
 		vertex_4,
+	};
+	
+	//sector 5
+	static const ReadWall wall_5[] = {
+		{nullind, 0x581B90FF, 0xA09080FF, 0xA09080FF},
+		{nullind, 0x581B90FF, 0xB0A090FF, 0xB0A090FF},
+		{      3, 0x581B90FF, 0xC0B0A0FF, 0xC0B0A0FF},
+		{nullind, 0x581B90FF, 0xD0C0B0FF, 0xD0C0B0FF},
+		{nullind, 0x581B90FF, 0xE0D0C0FF, 0xE0D0C0FF},
+		{nullind, 0x581B90FF, 0xF0E0D0FF, 0xF0E0D0FF},
+	};
+	
+	static const size_t vertex_5[] = {
+		3, 2, 7, 6, 5, 4
+	};
+	
+	static const ReadSector sector_5 = {
+		-150.0f,
+		120.0f,
+		0xFF3000FF,
+		0xB0A090FF,
 		6,
+		wall_5,
+		vertex_5,
 	};
 	
 	//Map data
-	static const ReadSector *sector_data[] = {
-		&sector_0,
-		&sector_1,
-		&sector_2,
-		&sector_3,
-		&sector_4,
+	static const ReadSector sector_data[] = {
+		sector_0,
+		sector_1,
+		sector_2,
+		sector_3,
+		sector_4,
+		sector_5,
 	};
 	
 	static const ReadMap map_data = {
+		6,
 		vert,
 		sector_data,
-		5,
 	};
-	
+	*/
 	
 	//Constants
 	static constexpr float near = 0.01f;
@@ -216,7 +253,7 @@ namespace Map
 		float y1a = (view.h / 2.0f) - (ceiling_height * yscale1), y1b = (view.h / 2.0f) - (floor_height * yscale1);
 		
 		//Prepare heights for interpolation
-		float w = 1.0f / (x1 - x0);
+		double w = 1.0 / (x1 - x0);
 		
 		double ya = y0a;
 		double yai = (y1a - y0a) * w;
@@ -367,17 +404,64 @@ namespace Map
 			DrawWall(sector_draw, sector_draw.sector->vertex[i], sector_draw.sector->vertex[i + 1], sector_draw.sector->wall[i]);
 	}
 	
+	void Map::DrawClipper(const Clipper &clipper)
+	{
+		Render::DrawLine(
+			clipper.left,
+			clipper.top[clipper.left],
+			clipper.left,
+			clipper.bottom[clipper.left],
+			0x0000FFFF
+		);
+		Render::DrawLine(
+			clipper.right - 1,
+			clipper.top[clipper.right - 1],
+			clipper.right - 1,
+			clipper.bottom[clipper.right - 1],
+			0x00FF00FF
+		);
+		for (int x = clipper.left; x < clipper.right; x++)
+		{
+			int t = clipper.top[x];
+			int b = clipper.bottom[x] - 1;
+			for (int y = t; y <= b; y++)
+			{
+				if (y == t)
+					screen_data[y * screen_pitch + x] = 0x00FFFFFF;
+				else if (y == b)
+					screen_data[y * screen_pitch + x] = 0xFF0000FF;
+			}
+		}
+	}
+	
 	void Map::Draw()
 	{
+		if (sector == nullptr)
+			return;
+		
 		size_t view_sector;
+		static size_t view_sector_none = 1;
 		if (view.y >= 800.0f)
 			view_sector = 4;
 		else if (view.y >= 500.0f)
-			view_sector = (view.x < 0.0f) ? 3 : 2;
+		{
+			if (view.x < 0.0f)
+			{
+				view_sector = 3;
+				view_sector_none = 5;
+			}
+			else
+			{
+				view_sector = 2;
+				view_sector_none = 1;
+			}
+		}
 		else if (view.y >= 100.0f)
-			view_sector = 1;
+			view_sector = view_sector_none;
 		else
 			view_sector = 0;
+		
+		view.z += ((sector[view_sector].floor_height + 41.0f) - view.z) * 0.1f;
 		
 		//Initial draw sector
 		Clipper clipper;
@@ -398,6 +482,10 @@ namespace Map
 		//Draw sectors
 		for (auto &i : draw_sector)
 			DrawSector(i);
+		
+		//Draw clippers
+		//for (auto &i : draw_sector)
+		//	DrawClipper(i.clipper);
 	}
 	
 	void Map::SetViewport(int w, int h)
@@ -424,7 +512,7 @@ namespace Map
 		}
 	}
 	
-	bool Map::ReadData(const ReadMap &read)
+	bool Map::LoadData(const ReadMap &read)
 	{
 		//Unload data
 		UnloadData();
@@ -436,11 +524,10 @@ namespace Map
 		
 		//Read sectors
 		Sector *tsector = sector;
-		for (size_t i = 0; i < sectors; i++, tsector++)
+		const ReadSector *fsector = read.sector;
+		for (size_t i = 0; i < sectors; i++, tsector++, fsector++)
 		{
 			//Read sector data
-			const ReadSector *fsector = read.sector[i];
-			
 			tsector->floor_height = fsector->floor_height;
 			tsector->ceiling_height = fsector->ceiling_height;
 			tsector->floor_colour = fsector->floor_colour;
@@ -468,7 +555,10 @@ namespace Map
 			//Allocate vertices
 			tsector->vertex = new Vertex[tsector->walls + 1];
 			if (tsector->vertex == nullptr)
+			{
+				delete[] tsector->wall;
 				return error.Push("Failed to allocate vertices");
+			}
 			
 			//Read vertices
 			Vertex *tvertex = tsector->vertex;
@@ -481,8 +571,86 @@ namespace Map
 		return false;
 	}
 	
-	//Constructor and destructor
-	Map::Map()
+	bool Map::ReadData(std::istream &stream)
+	{
+		//Read vertices
+		size_t vertices;
+		stream >> vertices;
+		
+		Vertex *vertex = new Vertex[vertices];
+		if (vertex == nullptr)
+			return error.Push("Failed to allocate vertex buffer");
+		
+		Vertex *vertexp = vertex;
+		for (size_t i = 0; i < vertices; i++, vertexp++)
+			stream >> vertexp->x >> vertexp->y;
+		
+		//Read sectors
+		size_t sectors;
+		stream >> sectors;
+		
+		ReadSector *read_sector = new ReadSector[sectors];
+		if (read_sector == nullptr)
+		{
+			delete[] vertex;
+			return error.Push("Failed to allocate sector buffer");
+		}
+		
+		ReadSector *sectorp = read_sector;
+		for (size_t i = 0; i < sectors; i++, sectorp++)
+		{
+			stream >> sectorp->floor_height >> sectorp->ceiling_height >> std::hex >> sectorp->floor_colour >> sectorp->ceiling_colour >> std::dec >> sectorp->walls;
+			
+			ReadWall *read_wall = new ReadWall[sectorp->walls];
+			if (read_wall == nullptr)
+			{
+				delete[] vertex;
+				delete[] read_sector;
+				return error.Push("Failed to allocate sector wall buffer");
+			}
+			
+			size_t *read_vertex = new size_t[sectorp->walls];
+			if (read_vertex == nullptr)
+			{
+				delete[] vertex;
+				delete[] read_wall;
+				delete[] read_sector;
+				return error.Push("Failed to allocate sector vertex buffer");
+			}
+			
+			ReadWall *read_wallp = read_wall;
+			size_t *read_vertexp = read_vertex;
+			for (size_t i = 0; i < sectorp->walls; i++, read_wallp++, read_vertexp++)
+				stream >> *read_vertexp >> read_wallp->sector >> std::hex >> read_wallp->upper_colour >> read_wallp->middle_colour >> read_wallp->lower_colour >> std::dec;
+			
+			sectorp->wall = read_wall;
+			sectorp->vertex = read_vertex;
+		}
+		
+		//Put read data together and load
+		ReadMap map = {
+			sectors,
+			vertex,
+			read_sector,
+		};
+		
+		bool result = LoadData(map);
+		
+		//Delete read buffers
+		delete[] map.vertex;
+		const ReadSector *rsectorp = map.sector;
+		for (size_t i = 0; i < sectors; i++, rsectorp++)
+		{
+			delete[] rsectorp->wall;
+			delete[] rsectorp->vertex;
+		}
+		delete[] map.sector;
+		
+		return result;
+	}
+	
+	//Initializtion
+	bool Map::Initialize()
 	{
 		//Initialize viewport
 		SetViewport(GAME_WIDTH, GAME_HEIGHT);
@@ -490,12 +658,40 @@ namespace Map
 		//Initialize view
 		view.x = 0.0f;
 		view.y = 0.0f;
+		view.z = 0.0f;
 		view.angle = pi / 2.0f;
 		
+		//Load test texture
 		texture = new Render::Texture(executable_dir + "Data/Weapon/Shotgun/0.png");
+		CheckInstanceCreate(texture, "Failed to load test texture")
 		
-		//Read data
-		if (ReadData(map_data))
+		return false;
+	}
+	
+	//Constructors and destructor
+	Map::Map(const ReadMap &read)
+	{
+		if (Initialize() || LoadData(read))
+			return;
+	}
+	
+	Map::Map(std::string path)
+	{
+		if (Initialize())
+			return;
+		std::ifstream stream(path);
+		if (!stream)
+		{
+			error.Push("Failed to open map file at " + path);
+			return;
+		}
+		if (ReadData(stream))
+			return;
+	}
+	
+	Map::Map(std::istream &stream)
+	{
+		if (Initialize() || ReadData(stream))
 			return;
 	}
 	
@@ -537,10 +733,6 @@ namespace Map
 			bob_angle -= pi * 2.0f;
 		float bob_x = bob * std::cos(bob_angle);
 		float bob_y = bob * std::abs(std::sin(bob_angle));
-		static float z_bob_angle = 0.0f;
-		if ((z_bob_angle += (game_state.dt * pi * 2.0f / 20.0f * 35.0f)) >= (pi * 2))
-			z_bob_angle -= pi * 2.0f;
-		view.z = bob / 2.0f * std::sin(z_bob_angle);
 		
 		//Get screen data
 		Render::GetScreen(&screen_data, &screen_pitch);

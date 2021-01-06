@@ -7,7 +7,6 @@
  * Authour(s): Regan "CuckyDev" Green
 */
 
-
 #include "Game.h"
 #include "GameMode_Editor.h"
 #include "GameDef.h"

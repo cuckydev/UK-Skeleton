@@ -8,6 +8,7 @@
 */
 
 #include "GameMode_Editor.h"
+#include "Main.h"
 
 namespace Game
 {
@@ -19,7 +20,7 @@ namespace Game
 	GameMode_Editor::GameMode_Editor()
 	{
 		//Create map
-		map = new Map::Map();
+		map = new Map::Map(executable_dir + "Data/Map/Map01.txt");
 		CheckInstanceCreate_Void(map, "Failed to create map instance")
 	}
 	
